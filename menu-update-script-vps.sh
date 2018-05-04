@@ -23,28 +23,15 @@ vps="aneka";
 #if [[ $vps = "zvur" ]]; then
 	#source="http://"
 #else
-	source="https://raw.githubusercontent.com/mappakkoe09/y"
+	source="https://raw.githubusercontent.com/SSL3/ww/master"
 #fi
 
 # go to root
 cd
 
-# check registered ip
-wget -q -O IP $source/debian7/IP.txt
-if ! grep -w -q $MYIP IP; then
-	echo "Maaf, hanya IP yang terdaftar yang bisa menggunakan script ini!"
-	if [[ $vps = "zvur" ]]; then
-		echo "Hubungi: editor MuLuu09 atau (+601131731782)"
-	else
-		echo "Hubungi: editor MuLuu09 atau (+601131731782)"
-	fi
-	rm -f /root/IP
-	exit
-fi
-cd
 function update_script() {
 cd
-wget -O /usr/bin/updatescript.sh $source/debian7/updatescript.sh && clear && chmod +x /usr/bin/updatescript.sh && /usr/bin/updatescript.sh && rm -f /root/IP && rm -f /root/IPcarding
+wget -O /usr/bin/updatescript.sh $source/updatescript.sh && clear && chmod +x /usr/bin/updatescript.sh && /usr/bin/updatescript.sh && rm -f /root/IP && rm -f /root/IPcarding
 }
 function anti_ddos() {
 if [ -d '/usr/local/ddos' ]; then
@@ -101,7 +88,7 @@ do
 	;;
 	"Install SQLmap")
 	cd /root
-	wget -O /usr/bin/install-sqlmap.sh $source/debian7/install-sqlmap.sh
+	wget -O /usr/bin/install-sqlmap.sh $source/install-sqlmap.sh
 	chmod 755 /usr/bin/install-sqlmap.sh
 	clear
 	/usr/bin/install-sqlmap.sh
