@@ -3,10 +3,10 @@
 #vps="zvur";
 vps="aneka";
 
-source="https://raw.githubusercontent.com/mappakkoe09/y"
+source="https://raw.githubusercontent.com/SSL3/ww/master"
 
 
 # go to root
 cd
 
-wget $source/debian7/bench.sh -O - -o /dev/null|bash
+wget $source/bench.sh -O - -o /dev/null|bash
