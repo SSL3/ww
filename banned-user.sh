@@ -17,7 +17,7 @@ fi
 
 echo "------- ---------- BANNED AKUN SSH --------------------"
 
-	echo "         DEVELOPED BY MuLuu09 (+601131731782)            "
+	echo "         DEVELOPED BY orangkuatsabahanterkini            "
 echo ""
 
 # begin of user-list
@@ -43,7 +43,7 @@ read -p "Isikan username: " username
 egrep "^$username" /etc/passwd >/dev/null
 if [ $? -eq 0 ]; then
 	echo ""
-	read -p "Apakah Anda benar-benar ingin mem-banned akun [$username] [y/n]: " -e -i y BANNED
+	read -p "Apakah Anda benar-benar ingin mem-banned account [$username] [y/n]: " -e -i y BANNED
 	if [[ "$BANNED" = 'y' ]]; then
 		echo " User : $username" >> /root/banneduser.txt
 		passwd -l $username
