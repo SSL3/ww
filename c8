@@ -106,6 +106,12 @@ cd
 rm -rf /root/.bashrc
 wget -O /root/.bashrc $source/debian7/.bashrc
 
+clear
+echo ""
+echo " Install... ( 37% )
+"
+echo -e "\033[1;34m"
+
 # install webserver
 cd
 rm /etc/nginx/sites-enabled/default
@@ -436,6 +442,12 @@ cat key.pem cert.pem >> /etc/stunnel/stunnel.pem
 sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
 /etc/init.d/stunnel4 restart
 
+clear
+echo ""
+echo " Install... ( 90% )
+
+"
+
 # download script
 cd
 wget -O /usr/bin/benchmark $source/debian7/benchmark.sh
@@ -513,6 +525,11 @@ sysctl vm.swappiness=10
 chown root:root /swapfile 
 chmod 0600 /swapfile
 cd
+
+clear
+echo ""
+echo -e "\033[1;31m 99% "
+echo -e "\033[1;36m "
 
 # finalisasi
 apt-get -y autoremove
