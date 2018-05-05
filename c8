@@ -50,18 +50,14 @@ sed -i '$ i\echo "nameserver 8.8.4.4" >> /etc/resolv.conf' /etc/rc.local
 apt-get update;apt-get -y install wget curl;
 
 # set time GMT +7
-ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
 
 # set repo
-cat > /etc/apt/sources.list <<END2
-deb http://security.debian.org/ jessie/updates main contrib non-free
-deb-src http://security.debian.org/ jessie/updates main contrib non-free
-deb http://http.us.debian.org/debian jessie main contrib non-free
-deb http://packages.dotdeb.org jessie all
-deb-src http://packages.dotdeb.org jessie all
-END2
-wget "http://www.dotdeb.org/dotdeb.gpg"
+wget -q -O /etc/apt/sources.list "https://raw.githubusercontent.com/dkdenza/DkDenza69/master/sources.list.debian8"
+wget -q "https://raw.githubusercontent.com/dkdenza/DkDenza69/master/dotdeb.gpg"
+wget -q "https://raw.githubusercontent.com/dkdenza/DkDenza69/master/jcameron-key.asc"
 cat dotdeb.gpg | apt-key add -;rm dotdeb.gpg
+cat jcameron-key.asc | apt-key add -;rm jcameron-key.asc
 
 # remove unused
 apt-get -y --purge remove samba*;
@@ -105,12 +101,6 @@ sudo gem install lolcat
 cd
 rm -rf /root/.bashrc
 wget -O /root/.bashrc $source/debian7/.bashrc
-
-clear
-echo ""
-echo " Install... ( 37% )
-"
-echo -e "\033[1;34m"
 
 # install webserver
 cd
@@ -231,8 +221,8 @@ sed -i '/Port 22/a Port 2020' /etc/ssh/sshd_config
 # install dropbear
 apt-get install dropbear
 sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
-sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=443/g' /etc/default/dropbear
-sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 443 -p 110 -p 109"/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=442/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 442 -p 110 -p 109"/g' /etc/default/dropbear
 echo "/bin/false" >> /etc/shells
 echo "/usr/sbin/nologin" >> /etc/shells
 sed -i 's/DROPBEAR_BANNER=""/DROPBEAR_BANNER="bannerssh"/g' /etc/default/dropbear
@@ -360,13 +350,11 @@ service squid3 restart
 
 # install webmin
 cd
-#wget -O webmin-current.deb http://prdownloads.sourceforge.net/webadmin/webmin_1.760_all.deb
-wget -O webmin-current.deb $source/debian7/webmin-current.deb
-dpkg -i --force-all webmin-current.deb
+wget "http://script.hostingtermurah.net/repo/webmin_1.801_all.deb"
+dpkg --install webmin_1.801_all.deb;
 apt-get -y -f install;
-#sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
-rm -f /root/webmin-current.deb
-apt-get -y --force-yes -f install libxml-parser-perl
+sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
+rm /root/webmin_1.801_all.deb
 service webmin restart
 service vnstat restart
 
@@ -400,16 +388,18 @@ END
 mkdir /var/lib/premium-script
 /etc/init.d/pptpd restart
 
-# Install BadVPN
-apt-get -y install cmake make gcc
-wget $source/debian7/badvpn-1.999.127.tar.bz2
-tar xf badvpn-1.999.127.tar.bz2
-mkdir badvpn-build
-cd badvpn-build
-cmake ~/badvpn-1.999.127 -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
-make install
-screen badvpn-udpgw --listen-addr 127.0.0.1:7300 > /dev/null &
-cd
+# set ipv4 forward
+echo 1 > /proc/sys/net/ipv4/ip_forward
+sed -i 's|#net.ipv4.ip_forward=1|net.ipv4.ip_forward=1|' /etc/sysctl.conf
+
+# install badvpn
+wget -O /usr/bin/badvpn-udpgw "http://script.hostingtermurah.net/repo/badvpn-udpgw"
+if [ "$OS" == "x86_64" ]; then
+  wget -O /usr/bin/badvpn-udpgw "http://script.hostingtermurah.net/repo/badvpn-udpgw64"
+fi
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/rc.local
+chmod +x /usr/bin/badvpn-udpgw
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300
 
 # install stunnel
 apt-get install stunnel4 -y
@@ -421,8 +411,8 @@ socket = a:SO_REUSEADDR=1
 socket = l:TCP_NODELAY=1
 socket = r:TCP_NODELAY=1
 [dropbear]
-accept = 442
-connect = 127.0.0.1:443
+accept = 443
+connect = 127.0.0.1:442
 connect = 127.0.0.1:109
 connect = 127.0.0.1:110
 ;[squid]
@@ -441,12 +431,6 @@ cat key.pem cert.pem >> /etc/stunnel/stunnel.pem
 #konfigurasi stunnel
 sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
 /etc/init.d/stunnel4 restart
-
-clear
-echo ""
-echo " Install... ( 90% )
-
-"
 
 # download script
 cd
@@ -525,11 +509,6 @@ sysctl vm.swappiness=10
 chown root:root /swapfile 
 chmod 0600 /swapfile
 cd
-
-clear
-echo ""
-echo -e "\033[1;31m 99% "
-echo -e "\033[1;36m "
 
 # finalisasi
 apt-get -y autoremove
